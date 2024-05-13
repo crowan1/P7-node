@@ -1,22 +1,25 @@
-const multer = require('multer')
+const multer = require("multer");
+const sharp = require("sharp");
+
 
 const MIME_TYPES = {
-    'image/jpg ': 'jpg',
-    'image/jpeg': 'jpg',
-    'image/png' : 'png'
-}
+    "image/jpg": "jpg",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+};
+
 
 const storage = multer.diskStorage({
-    destination : (req,file , callback)=>{
-        callback( null , 'images')
+    destination: (req, file, callback) => {
+        callback(null, "images");
     },
-    filename : (req,file, callback)=>{
-        const name = file.originalname.split(' ').join('_');
-        console.log(file.mimetype)
-        const extension = MIME_TYPES[file.mimetype]
-        callback(null, name + Date.now() + '.' + extension)
-    }
-})
+    filename: (req, file, callback) => {
+        const name = file.originalname.split(" ").join("_");
+        const extension = MIME_TYPES[file.mimetype];
+        callback(null, Date.now() + name + "." + extension);
+    },
+});
+
 
 const fileFilter = (req, file, callback) => {
     const isValid = MIME_TYPES[file.mimetype];
@@ -26,7 +29,6 @@ const fileFilter = (req, file, callback) => {
         callback(new Error("Type de fichier non pris en charge."), false);
     }
 };
-
 
 const upload = multer({
     storage: storage,
@@ -38,9 +40,11 @@ const upload = multer({
 
 
 const compressImage = (req, res, next) => {
+
     if (!req.file) {
         return next();
     }
+
     const filePath = req.file.path;
 
     sharp(filePath)
@@ -62,7 +66,6 @@ const compressImage = (req, res, next) => {
         });
 };
 
-
 const uploadImage = (req, res, next) => {
     upload(req, res, function (err) {
         if (err) {
@@ -74,7 +77,6 @@ const uploadImage = (req, res, next) => {
             } else if (err.message === "Type de fichier non pris en charge.") {
                 return res.status(400).json({ message: err.message });
             } else {
-                // Autre erreur
                 return res.status(400).json({ message: err.message });
             }
         }
@@ -83,11 +85,7 @@ const uploadImage = (req, res, next) => {
     });
 };
 
-
-module.exports = uploadImage
-module.exports = compressImage
-
-
-
-module.exports = multer({storage}).single('image') 
-
+module.exports = {
+    uploadImage,
+    compressImage,
+};
