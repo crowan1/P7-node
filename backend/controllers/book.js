@@ -24,7 +24,7 @@ exports.modifyThing = (req, res, next) => {
   
     delete thingObject._userId;
 
-    // Récupérer le chemin de l'ancienne image depuis la base de données
+ 
     Book.findOne({_id: req.params.id})
         .then((book) => {
             if (book.userId != req.auth.userId) {
@@ -32,7 +32,7 @@ exports.modifyThing = (req, res, next) => {
             } else {
                 const oldImagePath = book.imageUrl;
                 
-                // Supprimer l'ancienne image du système de fichiers
+ 
                 if (req.file && oldImagePath) {
                     fs.unlink(oldImagePath, (err) => {
                         if (err) {
@@ -43,7 +43,7 @@ exports.modifyThing = (req, res, next) => {
                     });
                 }
 
-                // Mettre à jour les informations du livre dans la base de données
+
                 Book.updateOne({ _id: req.params.id}, { ...thingObject, _id: req.params.id})
                     .then(() => res.status(200).json({message : 'Objet modifié!'}))
                     .catch(error => res.status(401).json({ error }));
