@@ -1,14 +1,14 @@
 const multer = require("multer");
 const sharp = require("sharp");
 
-
+//Listes des MIME pris en compte 
 const MIME_TYPES = {
     "image/jpg": "jpg",
     "image/jpeg": "jpg",
     "image/png": "png",
 };
 
-
+// stockage des fichiers 
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, "images");
@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
     },
 });
 
-
+// Filtrer les fichiers acceptés
 const fileFilter = (req, file, callback) => {
     const isValid = MIME_TYPES[file.mimetype];
     if (isValid) {
@@ -30,21 +30,24 @@ const fileFilter = (req, file, callback) => {
     }
 };
 
+// Stockage des images 
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 4 * 1024 * 1024, 
+        fileSize: 4 * 1024 * 1024, // limitation image, doit être inférieur a 4mo
     },
     fileFilter: fileFilter,
 }).single("image");
 
 
+// redimensionne l'image 
 const compressImage = (req, res, next) => {
 
     if (!req.file) {
         return next();
     }
 
+    // récupère image 
     const filePath = req.file.path;
 
     sharp(filePath)
@@ -66,6 +69,7 @@ const compressImage = (req, res, next) => {
         });
 };
 
+// téléchargement image 
 const uploadImage = (req, res, next) => {
     upload(req, res, function (err) {
         if (err) {

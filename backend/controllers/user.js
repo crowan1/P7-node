@@ -3,15 +3,12 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 require("dotenv").config({ path: ".env" });
 
-
+// Function s'inscrire, creation d'un compte
 exports.signup = (req,res,next)=>{
-
 
 const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-
 const errorMessages = [];
-
 
 if (!emailFormat.test(req.body.email)) {
     errorMessages.push("Format de l'email invalide.");
@@ -34,14 +31,14 @@ if (errorMessages.length > 0) {
     .catch(error => res.status(500).json({error}))
 };
 
-
+// Se connectert a son compte 
 exports.login = (req,res,next)=>{
     User.findOne({
         email : req.body.email })
         .then(user => {
             if (user === null){
                 res.status(401).json({message: 'paire id ou mdp incorrect'})
-       
+
             } else {
                 bcrypt.compare(req.body.password, user.password)
                 .then(valid =>{

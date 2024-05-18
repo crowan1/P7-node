@@ -1,6 +1,7 @@
 const Book = require('../models/book')
 const fs = require('fs');
 
+// Création d'un book
 exports.createThing = (req, res, next) => {
     const bookData = JSON.parse(req.body.book);
     delete bookData._id;
@@ -15,7 +16,7 @@ exports.createThing = (req, res, next) => {
         .catch((error) => { res.status(400).json({ error }) })
 }
 
-
+// Modification d'un book
 exports.modifyThing = (req, res, next) => {
     const thingObject = req.file ? {
         ...JSON.parse(req.body.book),
@@ -23,46 +24,29 @@ exports.modifyThing = (req, res, next) => {
     } : { ...req.body };
   
     delete thingObject._userId;
-
- 
     Book.findOne({_id: req.params.id})
         .then((book) => {
             if (book.userId != req.auth.userId) {
                 res.status(401).json({ message : 'Not authorized'});
             } else {
-                const oldImagePath = book.imageUrl;
-                
- 
-                if (req.file && oldImagePath) {
-                    fs.unlink(oldImagePath, (err) => {
-                        if (err) {
-                            console.error("Erreur lors de la suppression de l'ancienne image :", err);
-                        } else {
-                            console.log("Ancienne image supprimée avec succès :", oldImagePath);
-                        }
-                    });
-                }
-
-
                 Book.updateOne({ _id: req.params.id}, { ...thingObject, _id: req.params.id})
-                    .then(() => res.status(200).json({message : 'Objet modifié!'}))
-                    .catch(error => res.status(401).json({ error }));
+                .then(() => res.status(200).json({message : 'Objet modifié!'}))
+                .catch(error => res.status(401).json({ error }));
             }
         })
         .catch((error) => {
             res.status(400).json({ error });
         });
-};
-
+ };
    
-
-
+// Obtenir tous les livres enregistré
 exports.BibliothequeThing = (req, res, next) => {
     Book.find()
         .then(things => res.status(200).json(things))
         .catch(error => res.status(404).json({ error }))
 }
 
+// Supprimer un livre
 exports.deleteThing = (req, res, next) => {
     Book.findOne({ _id: req.params.id})
         .then(thing => {
@@ -82,8 +66,7 @@ exports.deleteThing = (req, res, next) => {
         });
  };
 
-
-
+ // Livre en detail
 exports.IdThing = (req, res, next) => {
     const bookId = req.params.id;
 
@@ -107,6 +90,7 @@ exports.IdThing = (req, res, next) => {
         });
 };
 
+// Function pour la notation des books
 exports.rateThing = (req, res, next) => {
     const bookId = req.params.id;
     const { userId, rating } = req.body;
@@ -118,8 +102,6 @@ exports.rateThing = (req, res, next) => {
             message: "La note doit être un chiffre entre 0 et 5.",
         });
     }
-
-
 
     Book.findById(bookId)
 
